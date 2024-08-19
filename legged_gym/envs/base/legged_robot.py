@@ -139,8 +139,14 @@ class LeggedRobot(BaseTask):
         """ Check if environments need to be reset
         """
         self.reset_buf = torch.any(torch.norm(self.contact_forces[:, self.termination_contact_indices, :], dim=-1) > 1., dim=1)
+        # self.contact_forces 是一个三维张量，存储了环境中所有接触点的力
+        # self.termination_contact_indices 是一个索引列表，指定哪些接触点是重要的
+        # torch.norm(..., dim=-1) 计算的是每个接触力向量的范数（即力的大小）
+        # torch.any(..., dim=1) 对接触力的范数进行检查，查看是否存在超过 1.0 的接触力。如果存在，则对应的环境需要重置。
         self.time_out_buf = self.episode_length_buf > self.max_episode_length # no terminal reward for time-outs
+        # 当 self.episode_length_buf 超过 self.max_episode_length 时，对应的环境在 self.time_out_buf 中被标记为 True，表示仿真需要重置
         self.reset_buf |= self.time_out_buf
+        # 逻辑或操作，如果 self.reset_buf 或 self.time_out_buf 中有一个为 True，则对应的环境需要重置
 
     def reset_idx(self, env_ids):
         """ Reset some environments.
